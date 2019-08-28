@@ -8,8 +8,9 @@
  *
  ******************************************************************************/
 
-import java.util.Comparator;
 import edu.princeton.cs.algs4.StdDraw;
+
+import java.util.Comparator;
 
 public class Point implements Comparable<Point> {
 
@@ -23,7 +24,6 @@ public class Point implements Comparable<Point> {
      * @param  y the <em>y</em>-coordinate of the point
      */
     public Point(int x, int y) {
-        /* DO NOT MODIFY */
         this.x = x;
         this.y = y;
     }
@@ -32,7 +32,6 @@ public class Point implements Comparable<Point> {
      * Draws this point to standard draw.
      */
     public void draw() {
-        /* DO NOT MODIFY */
         StdDraw.point(x, y);
     }
 
@@ -43,7 +42,6 @@ public class Point implements Comparable<Point> {
      * @param that the other point
      */
     public void drawTo(Point that) {
-        /* DO NOT MODIFY */
         StdDraw.line(this.x, this.y, that.x, that.y);
     }
 
@@ -59,7 +57,17 @@ public class Point implements Comparable<Point> {
      * @return the slope between this point and the specified point
      */
     public double slopeTo(Point that) {
-        /* YOUR CODE HERE */
+        if (this.x == that.x && this.y == that.y) {
+            return Double.NEGATIVE_INFINITY;
+        } else if (this.y == that.y) {
+            return +0.0;
+        } else if (this.x == that.x) {
+            return Double.POSITIVE_INFINITY;
+        } else {
+            double dX = that.x - this.x;
+            double dY = that.y - this.y;
+            return dY / dX;
+        }
     }
 
     /**
@@ -75,7 +83,26 @@ public class Point implements Comparable<Point> {
      *         argument point
      */
     public int compareTo(Point that) {
-        /* YOUR CODE HERE */
+        if (that.x == this.x && that.y == this.y) {
+            return 0;
+        } else if ((this.y < that.y) || (this.y == that.y && this.x < that.x)) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    class PointComparator implements Comparator<Point>  {
+
+        @Override
+        public int compare(Point p1, Point p2) {
+            return 0; // todo: implementation needed
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return false; // todo: implementation needed
+        }
     }
 
     /**
@@ -85,7 +112,7 @@ public class Point implements Comparable<Point> {
      * @return the Comparator that defines this ordering on points
      */
     public Comparator<Point> slopeOrder() {
-        /* YOUR CODE HERE */
+        return new PointComparator();
     }
 
     /**
@@ -96,7 +123,6 @@ public class Point implements Comparable<Point> {
      * @return a string representation of this point
      */
     public String toString() {
-        /* DO NOT MODIFY */
         return "(" + x + ", " + y + ")";
     }
 
