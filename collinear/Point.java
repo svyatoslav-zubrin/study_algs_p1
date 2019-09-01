@@ -164,22 +164,5 @@ public class Point implements Comparable<Point> {
             double slope2 = getCurrent().slopeTo(p2);
             return Double.compare(slope1, slope2);
         }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-
-            if (obj.getClass() != Point.class) {
-                return false;
-            }
-            return this.getCurrent().equals(obj);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.getCurrent().hashCode();
-        }
     }
 }
