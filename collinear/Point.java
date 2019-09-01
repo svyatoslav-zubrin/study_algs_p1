@@ -92,19 +92,6 @@ public class Point implements Comparable<Point> {
         }
     }
 
-    class PointComparator implements Comparator<Point>  {
-
-        @Override
-        public int compare(Point p1, Point p2) {
-            return 0; // todo: implementation needed
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return false; // todo: implementation needed
-        }
-    }
-
     /**
      * Compares two points by the slope they make with this point.
      * The slope is defined as in the slopeTo() method.
@@ -112,7 +99,7 @@ public class Point implements Comparable<Point> {
      * @return the Comparator that defines this ordering on points
      */
     public Comparator<Point> slopeOrder() {
-        return new PointComparator();
+        return new SlopeComparator(this);
     }
 
     /**
@@ -130,6 +117,69 @@ public class Point implements Comparable<Point> {
      * Unit tests the Point data type.
      */
     public static void main(String[] args) {
-        /* YOUR CODE HERE */
+        Point p1 = new Point(5, 0);
+        Point p2 = new Point(0, 10);
+        Point p3 = new Point(-5, 0);
+        Point p4 = new Point(0, -10);
+
+        double s1 = p1.slopeTo(p2);
+        System.out.println("-2 = " + s1);
+
+        double s2 = p1.slopeTo(p3);
+        System.out.println("0 = " + s2);
+
+        double s3 = p2.slopeTo(p4);
+        System.out.println("Double.POSITIVE_INFINITY = " + s3);
+
+        double s4 = p1.slopeTo(p1);
+        System.out.println("Double.NEGATIVE_INFINITY = " + s4);
+    }
+
+    // -------------------------------------------------------------------------
+
+    private class SlopeComparator implements Comparator<Point>  {
+        private Point current;
+
+        // Constructors
+
+        SlopeComparator(Point point) {
+            this.setCurrent(point);
+        }
+
+        // Setters & getters
+
+        private Point getCurrent() {
+            return current;
+        }
+
+        public void setCurrent(Point current) {
+            this.current = current;
+        }
+
+        // Lifecycle
+
+        @Override
+        public int compare(Point p1, Point p2) {
+            double slope1 = getCurrent().slopeTo(p1);
+            double slope2 = getCurrent().slopeTo(p2);
+            return Double.compare(slope1, slope2);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (obj.getClass() != Point.class) {
+                return false;
+            }
+            return this.getCurrent().equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.getCurrent().hashCode();
+        }
     }
 }

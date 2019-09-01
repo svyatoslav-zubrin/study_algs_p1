@@ -29,7 +29,6 @@ public class LineSegment {
         this.p = p;
         this.q = q;
     }
-
     
     /**
      * Draws this line segment to standard draw.
