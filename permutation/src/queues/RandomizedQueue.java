@@ -196,25 +196,33 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
 
         Iterator<Integer> iterator1 = rq.iterator();
-        //Iterator<Integer> iterator2 = rq.iterator();
+        Iterator<Integer> iterator2 = rq.iterator();
         int i = rq.size();
         while (iterator1.hasNext()) {
             Integer nextValue1 = iterator1.next();
             StdOut.println("Next1: " + nextValue1);
             rq.description();
-            // if (rq.size() != --i) {
-            //     failed = true;
-            //     StdOut.println("Error: rand.queue has incorrect size (3)");
-            // }
-            // if (iterator2.hasNext()) {
-            //     Integer nextValue2 = iterator2.next();
-            //     StdOut.println("Next2: " + nextValue2);
-            //     rq.description();
-            //     if (rq.size() != --i) {
-            //         failed = true;
-            //         StdOut.println("Error: rand.queue has incorrect size (4)");
-            //     }
-            // }
+            if (rq.size() != i) {
+                failed = true;
+                StdOut.println("Error: rand.queue has incorrect size (3)");
+            }
+            if (iterator2.hasNext()) {
+                Integer nextValue2 = iterator2.next();
+                StdOut.println("Next2: " + nextValue2);
+                rq.description();
+                if (rq.size() != i) {
+                    failed = true;
+                    StdOut.println("Error: rand.queue has incorrect size (4)");
+                }
+            }
+        }
+
+        int rq_size = rq.size();
+        System.out.println("rq.size = " + rq_size);
+
+        for (int j = 0; j < rq_size; j++) {
+            int extracted = rq.dequeue();
+            StdOut.println("deque #" + j + " : " + extracted);
         }
 
         if (!rq.isEmpty()) {
@@ -289,11 +297,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         @Override
         public boolean hasNext() {
-            if (items.length == 0) {
-                return false;
-            }
-
-            if (nextIndex > items.length) {
+            if (nextIndex >= items.length) {
                 return false;
             }
 
