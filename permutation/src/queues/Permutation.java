@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 public class Permutation {
 
     public static void main(String[] args) {
+
         Integer num = Integer.valueOf(args[0]);
         if (num == 0) return;
 
