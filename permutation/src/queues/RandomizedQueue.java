@@ -26,24 +26,29 @@ Performance requirements.
 public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // Variables
-    private Item[] items;
-    private int head = -1; // index of the first item in the queue (starts from 0)
-    private int tail = -1; // index of the last item in the queue (starts from 0)
+    private Node<Item> first = null;
+    private int size = 0;
+
+    private class Node<Item> {
+        private Item item;
+        private Node<Item> next;
+
+        Node(Item item) {
+            this.item = item;
+        }
+    }
 
     // construct an empty randomized queue
-    public RandomizedQueue() {
-        Object[] tmp = new Object[1];
-        items = (Item[]) tmp;
-    }
+    public RandomizedQueue() { }
 
     // is the randomized queue empty?
     public boolean isEmpty() {
-        return sizeCalculated() == 0;
+        return size == 0;
     }
 
     // return the number of items on the randomized queue
     public int size() {
-        return sizeCalculated();
+        return size;
     }
 
     // add the item
@@ -52,19 +57,19 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             throw new java.lang.NullPointerException();
         }
 
-        if (sizeCalculated() == sizeReserved()) {
-            resize(sizeReserved() * 2);
-        }
-        else if (tail == sizeReserved() - 1) { // no more space at the end of the array
-            reorder();
-        }
+        Node<Item> newNode = new Node<Item>(item);
 
         if (isEmpty()) {
-            head += 1;
+            first = newNode;
+        } else {
+            Node<Item> node = first;
+            while (node.next != null) {
+                node = node.next;
+            }
+            node.next = newNode;
         }
 
-        tail += 1;
-        items[tail] = item;
+        size += 1;
     }
 
     // remove and return a random item
@@ -74,21 +79,44 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
 
         Item result = null;
-        if (sizeCalculated() == 1) {
-            result = items[head];
-            items[head] = null;
-            head = -1;
-            tail = -1;
-        }
-        else {
-            result = extractRandomItem();
+
+        if (size == 1) {
+            result = first.item;
+            first = null;
+            size = 0;
+            return result;
+
         }
 
-        if (sizeCalculated() != 0 && sizeCalculated() <= sizeReserved() / 4) {
-            if (head > 0) {
-                reorder();
+        Node<Item> chosenNode = first;
+        Node<Item> beforeChosenNode = null;
+        int randomIndex = StdRandom.uniform(this.size);
+        if (randomIndex > 0) {
+            for (int i = 1; i < randomIndex; i++) {
+                beforeChosenNode = chosenNode;
+                chosenNode = chosenNode.next;
             }
-            resize(sizeReserved() / 2);
+        }
+
+        result = chosenNode.item;
+        Node<Item> afterChosenNode = chosenNode.next;
+
+        if (beforeChosenNode != null && afterChosenNode != null) {
+            // in the middle of the list
+            beforeChosenNode.next = afterChosenNode;
+            size -= 1;
+        } else if (beforeChosenNode != null) {
+            // end of the list
+            beforeChosenNode.next = null;
+            size -= 1;
+        } else if (afterChosenNode != null) {
+            // start of the list
+            first = afterChosenNode;
+            size -= 1;
+        } else {
+            // single element in the list, actually never should happen :)
+            first = null;
+            size = 0;
         }
 
         return result;
@@ -100,41 +128,44 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             throw new NoSuchElementException();
         }
 
-        if (head == tail) {
-            return items[head];
+        if (this.size == 1) {
+            return first.item;
         }
 
-        int randomIndex = StdRandom.uniform(head, tail + 1);
-        return items[randomIndex];
+        Node<Item> chosenNode = first;
+        int randomIndex = StdRandom.uniform(this.size);
+        if (randomIndex > 0) {
+            for (int i = 1; i < randomIndex; i++) {
+                chosenNode = chosenNode.next;
+            }
+        }
+        return chosenNode.item;
     }
 
     // Debug methods
 
     // prints internal state of the queue (for debug purposes)
     private void description() {
-        if (head == -1 && tail == -1) {
+        if (isEmpty()) {
             System.out.print("[]");
         }
         else {
             System.out.print("[");
-            for (int i = head; i <= tail; i++) {
-                System.out.print(items[i]);
-                System.out.print(", ");
-            }
+            Node<Item> current = first;
+            do {
+                System.out.print(current.item + ", ");
+                current = current.next;
+            } while (current != null);
             System.out.print("]");
         }
 
-        System.out.print(" :");
-        System.out.print(sizeCalculated());
-        System.out.print("/");
-        System.out.print(sizeReserved());
-
+        System.out.print(" : " + size);
         System.out.println();
     }
 
     // return an independent iterator over items in random order
     public Iterator<Item> iterator() {
-        return new TheIterator();
+        return new RandomIterator(this);
     }
 
     // Unit testing
@@ -165,25 +196,25 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
 
         Iterator<Integer> iterator1 = rq.iterator();
-        Iterator<Integer> iterator2 = rq.iterator();
+        //Iterator<Integer> iterator2 = rq.iterator();
         int i = rq.size();
         while (iterator1.hasNext()) {
             Integer nextValue1 = iterator1.next();
             StdOut.println("Next1: " + nextValue1);
             rq.description();
-            if (rq.size() != --i) {
-                failed = true;
-                StdOut.println("Error: rand.queue has incorrect size (3)");
-            }
-            if (iterator2.hasNext()) {
-                Integer nextValue2 = iterator2.next();
-                StdOut.println("Next2: " + nextValue2);
-                rq.description();
-                if (rq.size() != --i) {
-                    failed = true;
-                    StdOut.println("Error: rand.queue has incorrect size (4)");
-                }
-            }
+            // if (rq.size() != --i) {
+            //     failed = true;
+            //     StdOut.println("Error: rand.queue has incorrect size (3)");
+            // }
+            // if (iterator2.hasNext()) {
+            //     Integer nextValue2 = iterator2.next();
+            //     StdOut.println("Next2: " + nextValue2);
+            //     rq.description();
+            //     if (rq.size() != --i) {
+            //         failed = true;
+            //         StdOut.println("Error: rand.queue has incorrect size (4)");
+            //     }
+            // }
         }
 
         if (!rq.isEmpty()) {
@@ -199,61 +230,24 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // Helpers
 
-    // resizes the storage to given size storing data
-    private void resize(int capacity) {
-        Item[] copy = (Item[]) (new Object[capacity]);
-        int n = capacity;
-        if (sizeReserved() < capacity) {
-            n = sizeReserved();
+    private Item[] items() {
+        Item[] retval = (Item[]) new Object[size];
+
+        if (isEmpty()) {
+            return retval;
         }
-        for (int i = 0; i < n; i++) {
-            copy[i] = items[i];
-            items[i] = null;
+
+        Node<Item> current = first;
+        retval[0] = first.item;
+
+        for (int i = 1; i < size; i++) {
+            current = current.next;
+            retval[i] = current.item;
         }
-        items = copy;
+
+        return retval;
     }
 
-    // moves actual data to the beginning of the storage
-    private void reorder() {
-        for (int i = head; i < tail; i++) {
-            items[i - head] = items[i];
-            items[i] = null;
-        }
-
-        tail = tail - head;
-        head = 0;
-    }
-
-    // size of the queue based on real data stored
-    private int sizeCalculated() {
-        if (head > -1 && tail > -1) {
-            return tail - head + 1;
-        }
-        else {
-            return 0;
-        }
-    }
-
-    // max available size of the queue
-    private int sizeReserved() {
-        return items.length;
-    }
-
-    // actually extracts random item from the storage and makes sure that
-    // actual data placed in interrupted sequence (moving last item to the
-    // extracted place)
-    private Item extractRandomItem() {
-        int randomIndex = StdRandom.uniform(head, tail + 1);
-
-        Item result = items[randomIndex];
-        if (randomIndex != tail) {
-            items[randomIndex] = items[tail];
-            items[tail] = null;
-        }
-        tail -= 1;
-
-        return result;
-    }
 
     // Inner iterator class
 
@@ -262,17 +256,59 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     // todo: operations next() and hasNext() must take constant worst-case time
     // todo: may (and will need to) use a linear amount of extra memory per iterator
 
-    private class TheIterator implements Iterator<Item> {
-        public boolean hasNext() {
-            return !isEmpty();
+    private class RandomIterator implements Iterator<Item> {
+
+        private Item[] items;
+        private int[] randomIndexes;
+        private int nextIndex = 0;
+
+        RandomIterator(RandomizedQueue<Item> queue) {
+            items = queue.items();
+            int itemsCount = queue.size;
+            randomIndexes = new int[itemsCount];
+
+            if (itemsCount == 0) { return; }
+
+            for (int i = 0; i < itemsCount; i++) {
+                boolean indexAddedAndUnique = false;
+                do {
+                    int randomIndex = StdRandom.uniform(itemsCount);
+                    boolean isUnique = true;
+                    for (int j = 0; j < i; j++) {
+                        if (randomIndexes[j] == randomIndex) {
+                            isUnique = false;
+                        }
+                    }
+                    if (isUnique) {
+                        randomIndexes[i] = randomIndex;
+                        indexAddedAndUnique = true;
+                    }
+                } while (!indexAddedAndUnique);
+            }
         }
 
-        public Item next() {
-            if (isEmpty()) {
-                throw new NoSuchElementException();
+        @Override
+        public boolean hasNext() {
+            if (items.length == 0) {
+                return false;
             }
 
-            return extractRandomItem();
+            if (nextIndex > items.length) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public Item next() {
+            if (nextIndex < randomIndexes.length) {
+                int itemIndex = randomIndexes[nextIndex];
+                nextIndex += 1;
+                return items[itemIndex];
+            } else {
+                throw new NoSuchElementException();
+            }
         }
 
         public void remove() {
