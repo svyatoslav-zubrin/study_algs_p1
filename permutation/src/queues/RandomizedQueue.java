@@ -30,7 +30,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private int size = 0;
 
     private class Node<Item> {
-        private Item item;
+        final private Item item;
         private Node<Item> next;
 
         Node(Item item) {
@@ -38,23 +38,21 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
     }
 
-    // construct an empty randomized queue
+    // Public
+
     public RandomizedQueue() { }
 
-    // is the randomized queue empty?
     public boolean isEmpty() {
         return size == 0;
     }
 
-    // return the number of items on the randomized queue
     public int size() {
         return size;
     }
 
-    // add the item
     public void enqueue(Item item) {
         if (item == null) {
-            throw new java.lang.NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         Node<Item> newNode = new Node<Item>(item);
@@ -72,7 +70,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         size += 1;
     }
 
-    // remove and return a random item
     public Item dequeue() {
         if (isEmpty()) {
             throw new NoSuchElementException();
@@ -122,7 +119,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         return result;
     }
 
-    // return a random item (but do not remove it)
     public Item sample() {
         if (isEmpty()) {
             throw new NoSuchElementException();
@@ -142,9 +138,12 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         return chosenNode.item;
     }
 
+    public Iterator<Item> iterator() {
+        return new RandomIterator(this);
+    }
+
     // Debug methods
 
-    // prints internal state of the queue (for debug purposes)
     private void description() {
         if (isEmpty()) {
             System.out.print("[]");
@@ -163,12 +162,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         System.out.println();
     }
 
-    // return an independent iterator over items in random order
-    public Iterator<Item> iterator() {
-        return new RandomIterator(this);
-    }
+    // Unit testing (required)
 
-    // Unit testing
     public static void main(String[] args) {
         RandomizedQueue<Integer> rq = new RandomizedQueue<Integer>();
 
@@ -217,10 +212,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             }
         }
 
-        int rq_size = rq.size();
-        System.out.println("rq.size = " + rq_size);
+        int rqSize = rq.size();
+        System.out.println("rq.size = " + rqSize);
 
-        for (int j = 0; j < rq_size; j++) {
+        for (int j = 0; j < rqSize; j++) {
             int extracted = rq.dequeue();
             StdOut.println("deque #" + j + " : " + extracted);
         }
@@ -266,8 +261,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     private class RandomIterator implements Iterator<Item> {
 
-        private Item[] items;
-        private int[] randomIndexes;
+        final private Item[] items;
+        final private int[] randomIndexes;
         private int nextIndex = 0;
 
         RandomIterator(RandomizedQueue<Item> queue) {
@@ -316,7 +311,25 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
 
         public void remove() {
-            throw new java.lang.UnsupportedOperationException();
+            throw new UnsupportedOperationException();
         }
     }
+
+    // private class RandomLinkedIterator implements Iterator<Item> {
+
+    //     RandomLinkedIterator() {
+
+    //         // todo
+    //     }
+
+    //     @Override
+    //     public boolean hasNext() {
+    //         return false; // todo
+    //     }
+
+    //     @Override
+    //     public Item next() {
+    //         return null; // todo
+    //     }
+    // }
 }

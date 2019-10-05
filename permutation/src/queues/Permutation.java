@@ -13,7 +13,8 @@ public class Permutation {
 
     public static void main(String[] args) {
 
-        Integer num = Integer.valueOf(args[0]);
+        int num = Integer.parseInt(args[0]);
+
         if (num == 0) return;
 
         RandomizedQueue<String> queue = new RandomizedQueue<>();
@@ -23,7 +24,9 @@ public class Permutation {
                 queue.enqueue(item);
                 item = StdIn.readString();
             }
-        } catch (NoSuchElementException exception) { }
+        } catch (NoSuchElementException exception) {
+            StdOut.println(exception);
+        }
 
         for (int i = 0; i < num; i++) {
             StdOut.println(queue.dequeue());
