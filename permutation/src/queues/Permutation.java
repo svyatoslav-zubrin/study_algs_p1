@@ -7,8 +7,6 @@
 import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.NoSuchElementException;
-
 public class Permutation {
 
     public static void main(String[] args) {
@@ -18,14 +16,9 @@ public class Permutation {
         if (num == 0) return;
 
         RandomizedQueue<String> queue = new RandomizedQueue<>();
-        try {
+        while (!StdIn.isEmpty()) {
             String item = StdIn.readString();
-            while (item != null) {
-                queue.enqueue(item);
-                item = StdIn.readString();
-            }
-        } catch (NoSuchElementException exception) {
-            StdOut.println(exception);
+            queue.enqueue(item);
         }
 
         for (int i = 0; i < num; i++) {

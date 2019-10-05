@@ -216,19 +216,19 @@ public class Deque<Item> implements Iterable<Item> {
             StdOut.println("-----------------------------------------------");
         }
 
-        testAddRemoveLast();
+        // testAddRemoveLast();
     }
 
-    private static void testAddRemoveLast() {
-        StdOut.println("--------------- testAddRemoveLast --------------");
-        Deque<Integer> deque = new Deque<>();
-        deque.addLast(3);
-        Integer item = deque.removeLast();
-
-        boolean success = (item == 3) && deque.isEmpty();
-
-        StdOut.println("Success: " + success);
-    }
+    // private static void testAddRemoveLast() {
+    //     StdOut.println("--------------- testAddRemoveLast --------------");
+    //     Deque<Integer> deque = new Deque<>();
+    //     deque.addLast(3);
+    //     Integer item = deque.removeLast();
+    //
+    //     boolean success = (item == 3) && deque.isEmpty();
+    //
+    //     StdOut.println("Success: " + success);
+    // }
 
     // Helpers
 

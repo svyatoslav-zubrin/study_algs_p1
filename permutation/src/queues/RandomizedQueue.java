@@ -1,7 +1,7 @@
 /* *****************************************************************************
  *  Name: Slava Zubrin
- *  Date:
- *  Description:
+ *  Date: today
+ *  Description: smth
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.StdOut;
@@ -26,48 +26,37 @@ Performance requirements.
 public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // Variables
-    private Node<Item> first = null;
-    private int size = 0;
-
-    private class Node<Item> {
-        final private Item item;
-        private Node<Item> next;
-
-        Node(Item item) {
-            this.item = item;
-        }
-    }
+    private Item[] items;
+    private int itemsCount = 0;
+    private int sizeReserved = 2;
 
     // Public
 
-    public RandomizedQueue() { }
+    public RandomizedQueue() { 
+        Object[] tmp = new Object[sizeReserved];
+        items = (Item[]) tmp;
+    }
 
     public boolean isEmpty() {
-        return size == 0;
+        return itemsCount == 0;
     }
 
     public int size() {
-        return size;
+        return itemsCount;
     }
 
-    public void enqueue(Item item) {
+    public void enqueue(Item item) {    
         if (item == null) {
             throw new IllegalArgumentException();
         }
 
-        Node<Item> newNode = new Node<Item>(item);
-
-        if (isEmpty()) {
-            first = newNode;
-        } else {
-            Node<Item> node = first;
-            while (node.next != null) {
-                node = node.next;
-            }
-            node.next = newNode;
+        if (itemsCount == sizeReserved) {
+            sizeReserved *= 2;
+            resize(sizeReserved);
         }
 
-        size += 1;
+        items[itemsCount] = item;
+        itemsCount += 1;
     }
 
     public Item dequeue() {
@@ -75,45 +64,19 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             throw new NoSuchElementException();
         }
 
-        Item result = null;
+        int index = StdRandom.uniform(itemsCount);
+        Item result = items[index];
 
-        if (size == 1) {
-            result = first.item;
-            first = null;
-            size = 0;
-            return result;
-
+        int tailIndex = itemsCount - 1;
+        if (index != tailIndex) {
+            swap(index, tailIndex);
         }
 
-        Node<Item> chosenNode = first;
-        Node<Item> beforeChosenNode = null;
-        int randomIndex = StdRandom.uniform(this.size);
-        if (randomIndex > 0) {
-            for (int i = 1; i < randomIndex; i++) {
-                beforeChosenNode = chosenNode;
-                chosenNode = chosenNode.next;
-            }
-        }
+        itemsCount -= 1;
 
-        result = chosenNode.item;
-        Node<Item> afterChosenNode = chosenNode.next;
-
-        if (beforeChosenNode != null && afterChosenNode != null) {
-            // in the middle of the list
-            beforeChosenNode.next = afterChosenNode;
-            size -= 1;
-        } else if (beforeChosenNode != null) {
-            // end of the list
-            beforeChosenNode.next = null;
-            size -= 1;
-        } else if (afterChosenNode != null) {
-            // start of the list
-            first = afterChosenNode;
-            size -= 1;
-        } else {
-            // single element in the list, actually never should happen :)
-            first = null;
-            size = 0;
+        if (itemsCount != 0 && itemsCount <= sizeReserved / 4) {
+            sizeReserved /= 2;
+            resize(sizeReserved);
         }
 
         return result;
@@ -124,42 +87,73 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             throw new NoSuchElementException();
         }
 
-        if (this.size == 1) {
-            return first.item;
-        }
-
-        Node<Item> chosenNode = first;
-        int randomIndex = StdRandom.uniform(this.size);
-        if (randomIndex > 0) {
-            for (int i = 1; i < randomIndex; i++) {
-                chosenNode = chosenNode.next;
-            }
-        }
-        return chosenNode.item;
+        int index = StdRandom.uniform(itemsCount);
+        return items[index];
     }
 
     public Iterator<Item> iterator() {
         return new RandomIterator(this);
     }
 
-    // Debug methods
+    // Helpers
+
+    private void resize(int newSize) {
+        Item[] copy = (Item[]) (new Object[newSize]);
+        for (int i = 0; i < itemsCount; i++) {
+            copy[i] = items[i];
+            items[i] = null;
+        }
+        items = copy;
+    }
+
+    private void swap(int toIndex, int fromIndex) {
+        items[toIndex] = items[fromIndex];
+        items[fromIndex] = null;
+    }
+
+    // Debug routines
 
     private void description() {
+        StdOut.println(" ------------------- ");
         if (isEmpty()) {
-            System.out.print("[]");
+            StdOut.println("[]");
         }
         else {
-            System.out.print("[");
-            Node<Item> current = first;
-            do {
-                System.out.print(current.item + ", ");
-                current = current.next;
-            } while (current != null);
-            System.out.print("]");
+            StdOut.print("[");
+            for (int i = 0; i < itemsCount; i++) {
+                StdOut.print(items[i]);
+                StdOut.print(", ");
+            }
+            StdOut.print("]");
+        }
+        StdOut.println("");
+    }
+
+    // Inner iterator class
+
+    private class RandomIterator implements Iterator<Item> {
+        private final RandomizedQueue<Item> queue;
+
+        RandomIterator(RandomizedQueue<Item> queue) {
+            this.queue = queue;
         }
 
-        System.out.print(" : " + size);
-        System.out.println();
+        @Override
+        public boolean hasNext() {
+            return !queue.isEmpty();
+        }
+
+        @Override
+        public Item next() {
+            if (queue.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+            return queue.dequeue();
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     // Unit testing (required)
@@ -170,7 +164,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         rq.enqueue(1);
         rq.enqueue(2);
         rq.enqueue(3);
-        rq.enqueue(4);
+        rq.enqueue(4);  
         rq.enqueue(5);
         rq.description();
 
@@ -197,6 +191,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             Integer nextValue1 = iterator1.next();
             StdOut.println("Next1: " + nextValue1);
             rq.description();
+            i -= 1;
             if (rq.size() != i) {
                 failed = true;
                 StdOut.println("Error: rand.queue has incorrect size (3)");
@@ -205,6 +200,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
                 Integer nextValue2 = iterator2.next();
                 StdOut.println("Next2: " + nextValue2);
                 rq.description();
+                i -= 1;
                 if (rq.size() != i) {
                     failed = true;
                     StdOut.println("Error: rand.queue has incorrect size (4)");
@@ -230,106 +226,4 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             StdOut.println("Rand.queue success!");
         }
     }
-
-    // Helpers
-
-    private Item[] items() {
-        Item[] retval = (Item[]) new Object[size];
-
-        if (isEmpty()) {
-            return retval;
-        }
-
-        Node<Item> current = first;
-        retval[0] = first.item;
-
-        for (int i = 1; i < size; i++) {
-            current = current.next;
-            retval[i] = current.item;
-        }
-
-        return retval;
-    }
-
-
-    // Inner iterator class
-
-    // todo: make sure that more than one iterator can exist and operate simultaneously
-    // todo: construction must take linear time
-    // todo: operations next() and hasNext() must take constant worst-case time
-    // todo: may (and will need to) use a linear amount of extra memory per iterator
-
-    private class RandomIterator implements Iterator<Item> {
-
-        final private Item[] items;
-        final private int[] randomIndexes;
-        private int nextIndex = 0;
-
-        RandomIterator(RandomizedQueue<Item> queue) {
-            items = queue.items();
-            int itemsCount = queue.size;
-            randomIndexes = new int[itemsCount];
-
-            if (itemsCount == 0) { return; }
-
-            for (int i = 0; i < itemsCount; i++) {
-                boolean indexAddedAndUnique = false;
-                do {
-                    int randomIndex = StdRandom.uniform(itemsCount);
-                    boolean isUnique = true;
-                    for (int j = 0; j < i; j++) {
-                        if (randomIndexes[j] == randomIndex) {
-                            isUnique = false;
-                        }
-                    }
-                    if (isUnique) {
-                        randomIndexes[i] = randomIndex;
-                        indexAddedAndUnique = true;
-                    }
-                } while (!indexAddedAndUnique);
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (nextIndex >= items.length) {
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public Item next() {
-            if (nextIndex < randomIndexes.length) {
-                int itemIndex = randomIndexes[nextIndex];
-                nextIndex += 1;
-                return items[itemIndex];
-            } else {
-                throw new NoSuchElementException();
-            }
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    // private class RandomLinkedIterator implements Iterator<Item> {
-
-    //     RandomLinkedIterator() {
-
-    //         // todo
-    //     }
-
-    //     @Override
-    //     public boolean hasNext() {
-    //         return false; // todo
-    //     }
-
-    //     @Override
-    //     public Item next() {
-    //         return null; // todo
-    //     }
-    // }
 }
