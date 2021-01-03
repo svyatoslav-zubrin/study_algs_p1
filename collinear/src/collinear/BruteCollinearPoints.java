@@ -14,11 +14,13 @@ public class BruteCollinearPoints {
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
-        this.points = points;
+        this.points = points.clone();
         this.segments = new LineSegment[points.length / 4];
 
         findSegments();
     }
+
+    // Public
 
     // the number of line segments
     public int numberOfSegments() {
@@ -27,7 +29,7 @@ public class BruteCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
-        return this.segments;
+        return this.segments.clone();
     }
 
     // Helpers
@@ -72,6 +74,7 @@ public class BruteCollinearPoints {
         int n = in.readInt();         // number of data points in the input file
 
         Point[] points = new Point[n];
+
         int counter = 0;
         while (!in.isEmpty()) {
             int i = in.readInt();
