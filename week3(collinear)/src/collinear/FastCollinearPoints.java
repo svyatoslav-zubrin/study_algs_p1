@@ -41,13 +41,9 @@ public class FastCollinearPoints {
 
         // StdOut.println("Points: " + Arrays.toString(points));
 
-        ArrayList<Point> test = new ArrayList<>();
-        
-        Point[] segmentsOnTheGoMin = new Point[sortedPoints.length * MIN_SEGMENT_LENGTH];
-        Point[] segmentsOnTheGoMax = new Point[sortedPoints.length * MIN_SEGMENT_LENGTH];
-        Double[] segmentsOnTheGoSlope = new Double[sortedPoints.length * MIN_SEGMENT_LENGTH];
-
-        int segmentIndex = 0;
+        ArrayList<Point> segmentsOnTheGoMin = new ArrayList<>();
+        ArrayList<Point> segmentsOnTheGoMax = new ArrayList<>();
+        ArrayList<Double> segmentsOnTheGoSlope = new ArrayList<>();
 
         for (int i = 0; i <= sortedPoints.length - MIN_SEGMENT_LENGTH; i++) {
             Point thePoint = sortedPoints[i];
@@ -85,10 +81,10 @@ public class FastCollinearPoints {
                     if (!isLastPoint) { continue; }
 
                     if (currentSegmentSize >= MIN_SEGMENT_LENGTH) {
-                        int[] indices = indicesOf(lastSlope, segmentsOnTheGoSlope, segmentIndex);
+                        ArrayList<Integer> indices = indicesOf(lastSlope, segmentsOnTheGoSlope);
                         boolean shouldAddNewSegment = true;
                         for (int index: indices) {
-                            Point maxPoint = segmentsOnTheGoMax[index];
+                            Point maxPoint = segmentsOnTheGoMax.get(index);
                             if (maxPoint.equals(currentSegmentFinalPoint)) {
                                 shouldAddNewSegment = false;
                                 break;
@@ -96,22 +92,21 @@ public class FastCollinearPoints {
                         }
 
                         if (shouldAddNewSegment) {
-                            segmentsOnTheGoMin[segmentIndex] = thePoint;
-                            segmentsOnTheGoMax[segmentIndex] = currentSegmentFinalPoint;
-                            segmentsOnTheGoSlope[segmentIndex] = lastSlope;
-                            segmentIndex += 1;
+                            segmentsOnTheGoMin.add(thePoint);
+                            segmentsOnTheGoMax.add(currentSegmentFinalPoint);
+                            segmentsOnTheGoSlope.add(lastSlope);
                             // StdOut.println("add segment: " + thePoint.toString() + " -> " + currentSegmentFinalPoint.toString() + ", slope: " + currentSlope);
                         }
                     }
                 } else {
                     if (currentSegmentSize >= MIN_SEGMENT_LENGTH) {
-                        int[] indices = indicesOf(lastSlope, segmentsOnTheGoSlope, segmentIndex);
+                        ArrayList<Integer> indices = indicesOf(lastSlope, segmentsOnTheGoSlope);
 
                         // StdOut.println("indices: " + Arrays.toString(indices));
 
                         boolean shouldAddNewSegment = true;
                         for (int index: indices) {
-                            Point maxPoint = segmentsOnTheGoMax[index];
+                            Point maxPoint = segmentsOnTheGoMax.get(index);
                             if (maxPoint.equals(currentSegmentFinalPoint)) {
                                 shouldAddNewSegment = false;
                                 break;
@@ -119,10 +114,9 @@ public class FastCollinearPoints {
                         }
 
                         if (shouldAddNewSegment) {
-                            segmentsOnTheGoMin[segmentIndex] = thePoint;
-                            segmentsOnTheGoMax[segmentIndex] = currentSegmentFinalPoint;
-                            segmentsOnTheGoSlope[segmentIndex] = lastSlope;
-                            segmentIndex += 1;
+                            segmentsOnTheGoMin.add(thePoint);
+                            segmentsOnTheGoMax.add(currentSegmentFinalPoint);
+                            segmentsOnTheGoSlope.add(lastSlope);
                             // StdOut.println("add segment: " + thePoint.toString() + " -> " + currentSegmentFinalPoint.toString() + ", slope: " + currentSlope);
                         }
                     }
@@ -135,10 +129,10 @@ public class FastCollinearPoints {
             }
         }
 
-        this.segmentsNumber = segmentIndex;
-        this.segments = new LineSegment[segmentIndex];
-        for (int i = 0; i < segmentIndex; i++) {
-            LineSegment s = new LineSegment(segmentsOnTheGoMin[i], segmentsOnTheGoMax[i]);
+        this.segmentsNumber = segmentsOnTheGoMin.size();
+        this.segments = new LineSegment[segmentsOnTheGoMin.size()];
+        for (int i = 0; i < segmentsOnTheGoMin.size(); i++) {
+            LineSegment s = new LineSegment(segmentsOnTheGoMin.get(i), segmentsOnTheGoMax.get(i));
             this.segments[i] = s;
         }
     }
@@ -155,24 +149,14 @@ public class FastCollinearPoints {
 
     // Private
 
-    private static <T> int[] indicesOf(T val, T[] arr, int max) {
-        if (max == 0) { return new int[0]; }
-
-        int[] tmp = new int[max];
-        int tmpCount = 0;
-        for (int i = 0; i < max; i++) {
-            if (arr[i].equals(val)) {
-                tmp[tmpCount] = i;
-                tmpCount += 1;
+    private static <T> ArrayList<Integer> indicesOf(T val, ArrayList<T> arr) {
+        ArrayList<Integer> retval = new ArrayList<>();
+        for (int i = 0; i < arr.size(); i++) {
+            if (arr.get(i).equals(val)) {
+                retval.add(i);
             }
         }
-
-        int[] result = new int[tmpCount];
-        for (int i = 0; i < tmpCount; i++) {
-            result[i] = tmp[i];
-        }
-
-        return result;
+        return retval;
     }
 
     // Client code
