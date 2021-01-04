@@ -7,6 +7,9 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class BruteCollinearPoints {
 
     private final Point[] points;
@@ -14,10 +17,26 @@ public class BruteCollinearPoints {
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
-        this.points = points.clone();
-        this.segments = new LineSegment[points.length / 4];
+        // input checks
+        if (points == null) throw new IllegalArgumentException();
 
-        findSegments();
+        for (Point point: points) {
+            if (point == null) throw new IllegalArgumentException();
+        }
+
+        for (int i = 0; i < points.length; i++) {
+            for (int j = i + 1; j < points.length; j++) {
+                if (points[i].equals(points[j])) {
+                    throw new IllegalArgumentException();
+                }
+            }
+        }
+
+        // actual segments construction starts here
+        this.points = points.clone();
+        Arrays.sort(this.points);
+
+        this.segments = findSegments();
     }
 
     // Public
@@ -34,9 +53,8 @@ public class BruteCollinearPoints {
 
     // Helpers
 
-    private void findSegments() {
-        // todo: do we need to sort points first?
-        int segmentsCount = 0;
+    private LineSegment[] findSegments() {
+        ArrayList<LineSegment> constructedSegments = new ArrayList<>();
 
         for (int i = 0; i < this.points.length; i++) {
             for (int j = i + 1; j < this.points.length; j++) {
@@ -59,13 +77,14 @@ public class BruteCollinearPoints {
                             // StdOut.println("  1->3: " + s3);
                             // StdOut.println("  1->4: " + s4);
                             // StdOut.println("  inds: " + " (" + i + ", " + j  + ", " + k + ", " + m + ")");
-                            this.segments[segmentsCount] = new LineSegment(p1, p4);
-                            segmentsCount++;
+                            constructedSegments.add(new LineSegment(p1, p4));
                         }
                     }
                 }
             }
         }
+
+        return constructedSegments.toArray(new LineSegment[0]);
     }
 
     // Main
